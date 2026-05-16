@@ -8,7 +8,18 @@ const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <ClerkProvider publishableKey={publishableKey}>
+    <ClerkProvider publishableKey={publishableKey} localization={{
+        formButtonPrimary: 'Enter',
+        signIn: {
+          start: {
+            title: 'Welcome to sound-bored!',
+            subtitle: 'Sign in with your email.',
+          },
+          emailCode: {
+            subtitle: 'to continue to sound-bored',
+          },
+        },
+      }}>
       <App />
     </ClerkProvider>
   </StrictMode>,

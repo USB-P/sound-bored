@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, forwardRef } from 'react';
 
 let activeAudio = null;
 let activeProgress = null;
@@ -15,7 +15,7 @@ export function stopActiveAudio() {
   }
 }
 
-function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite }) {
+const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite, color = 'red', keyLabel }, ref) {
   const progressRef = useRef(null);
 
   function handleClick() {
@@ -57,7 +57,7 @@ function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite }) 
   const paddedIndex = String(index).padStart(2, '0');
 
   return (
-    <button className="sound-button" onClick={handleClick}>
+    <button ref={ref} className={`sound-button sound-button--${color}`} onClick={handleClick}>
       <div ref={progressRef} className="sound-button-progress" />
       <span className="sound-button-index">{paddedIndex}</span>
       <span
@@ -69,8 +69,9 @@ function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite }) 
         {isFavorited ? '★' : '☆'}
       </span>
       <span className="sound-button-label">{label}</span>
+      {keyLabel && <span className="sound-button-key">{keyLabel}</span>}
     </button>
   );
-}
+})
 
 export default SoundButton;
