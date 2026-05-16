@@ -115,7 +115,7 @@ function App() {
       <SignedIn>
         <div className="soundboard-card">
           <div className="soundboard-header">
-            <span className="soundboard-title">Sound-Bored</span>
+            <span className="soundboard-title">sound-bored</span>
             <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
               reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span>
             </button>
