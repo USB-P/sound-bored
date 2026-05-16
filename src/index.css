@@ -346,6 +346,7 @@ body {
   position: absolute;
   top: 120px;
   left: 7px;
+  right: 22px;
   transform: translateY(-50%);
   font-family: 'Geist Pixel', monospace;
   font-size: 12px;
@@ -353,6 +354,8 @@ body {
   letter-spacing: -0.048px;
   line-height: 1;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sound-button-key {
@@ -364,4 +367,18 @@ body {
   color: #000;
   opacity: 0.4;
   line-height: 1;
+}
+
+@media (max-width: 600px) {
+  .soundboard-card {
+    border-radius: 20px;
+    padding: 16px;
+    gap: 16px;
+    margin-top: 12px;
+  }
+
+  .sound-grid,
+  .favorites-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
