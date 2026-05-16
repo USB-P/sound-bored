@@ -1,19 +1,31 @@
 import { useRef } from 'react';
 
+let activeAudio = null;
+let activeProgress = null;
+
+export function stopActiveAudio() {
+  if (activeAudio) {
+    activeAudio.pause();
+    activeAudio = null;
+  }
+  if (activeProgress) {
+    activeProgress.style.transition = 'none';
+    activeProgress.style.height = '0%';
+    activeProgress = null;
+  }
+}
+
 function SoundButton({ label, soundSrc, index }) {
   const progressRef = useRef(null);
-  const audioRef = useRef(null);
 
   function handleClick() {
     if (!soundSrc) return;
 
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current = null;
-    }
+    stopActiveAudio();
 
     const audio = new Audio(soundSrc);
-    audioRef.current = audio;
+    activeAudio = audio;
+    activeProgress = progressRef.current;
 
     const progress = progressRef.current;
     progress.style.transition = 'none';
@@ -32,7 +44,8 @@ function SoundButton({ label, soundSrc, index }) {
     audio.addEventListener('ended', () => {
       progress.style.transition = 'none';
       progress.style.height = '0%';
-      audioRef.current = null;
+      activeAudio = null;
+      activeProgress = null;
     });
   }
 

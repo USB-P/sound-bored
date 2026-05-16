@@ -1,5 +1,6 @@
+import { useEffect } from 'react'
 import { SignedIn, SignedOut, SignIn, UserButton } from '@clerk/clerk-react'
-import SoundButton from './components/SoundButton'
+import SoundButton, { stopActiveAudio } from './components/SoundButton'
 import fiftyLet from './sounds/50_let.mp3'
 import ameba from './sounds/ameba.mp3'
 import brcnoZogo from './sounds/brcno_zogo.mp3'
@@ -71,6 +72,17 @@ const sounds = [
 ]
 
 function App() {
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'Escape') {
+        stopActiveAudio();
+        document.activeElement?.blur();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <>
       <SignedOut>
