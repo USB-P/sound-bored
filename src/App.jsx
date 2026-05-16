@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-react'
-import SoundButton, { stopActiveAudio } from './components/SoundButton'
+import SoundButton, { stopActiveAudio, isAudioActive } from './components/SoundButton'
 
 const FAV_KEYS = ['1','2','3','4','5','6','7','8','9','0']
 
@@ -31,9 +31,13 @@ const sounds = Object.entries(colorGlobs).flatMap(([color, modules]) =>
 function App() {
   const { user } = useUser()
   const [favorites, setFavorites] = useState([])
+  const [reverbEnabled, setReverbEnabled] = useState(true)
 
   useEffect(() => {
-    if (user) setFavorites(user.unsafeMetadata?.favorites ?? [])
+    if (user) {
+      setFavorites(user.unsafeMetadata?.favorites ?? [])
+      setReverbEnabled(user.unsafeMetadata?.reverb ?? true)
+    }
   }, [user?.id])
 
   function toggleFavorite(label) {
@@ -42,6 +46,12 @@ function App() {
       : [...favorites, label]
     setFavorites(next)
     user.update({ unsafeMetadata: { ...user.unsafeMetadata, favorites: next } })
+  }
+
+  function toggleReverb() {
+    const next = !reverbEnabled
+    setReverbEnabled(next)
+    user.update({ unsafeMetadata: { ...user.unsafeMetadata, reverb: next } })
   }
 
   const favRefs = useRef([])
@@ -57,10 +67,24 @@ function App() {
         return
       }
       const idx = FAV_KEYS.indexOf(e.key)
-      if (idx !== -1) favRefs.current[idx]?.click()
+      if (idx !== -1) {
+        const btn = favRefs.current[idx]
+        if (btn) {
+          btn.classList.add('is-active')
+          if (!e.repeat || !isAudioActive()) btn.click()
+        }
+      }
+    }
+    function handleKeyUp(e) {
+      const idx = FAV_KEYS.indexOf(e.key)
+      if (idx !== -1) favRefs.current[idx]?.classList.remove('is-active')
     }
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
   }, []);
 
   return (
@@ -92,6 +116,9 @@ function App() {
         <div className="soundboard-card">
           <div className="soundboard-header">
             <span className="soundboard-title">Sound-Bored</span>
+            <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
+              reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span>
+            </button>
             <UserButton appearance={{
               variables: {
                 colorPrimary: '#cd401d',
@@ -125,6 +152,7 @@ function App() {
                 keyLabel={FAV_KEYS[i]}
                 isFavorited
                 onToggleFavorite={toggleFavorite}
+                reverbEnabled={reverbEnabled}
               />
             ))}
             {Array.from({ length: placeholderCount }).map((_, i) => (
@@ -144,6 +172,7 @@ function App() {
                 color={sound.color}
                 isFavorited={favorites.includes(sound.label)}
                 onToggleFavorite={toggleFavorite}
+                reverbEnabled={reverbEnabled}
               />
             ))}
           </div>
