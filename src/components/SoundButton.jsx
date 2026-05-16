@@ -29,16 +29,12 @@ function buildLargeRoomIR(ctx) {
 
 async function buildReverbChain(ctx) {
   const buffer = buildLargeRoomIR(ctx);
-
   const convolver = ctx.createConvolver();
   convolver.buffer = buffer;
-
   const wetGain = ctx.createGain();
   wetGain.gain.value = 0;
-
   convolver.connect(wetGain);
   wetGain.connect(ctx.destination);
-
   return { reverbInput: convolver, wetGain };
 }
 
@@ -63,61 +59,72 @@ export function stopActiveAudio() {
   }
 }
 
-const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite, color = 'red', keyLabel, reverbEnabled }, ref) {
+async function playAudioCore(src, reverbEnabled, progressEl) {
+  stopActiveAudio();
+
+  const ctx = getAudioContext();
+  if (ctx.state === 'suspended') ctx.resume();
+
+  const audio = new Audio(src);
+  audio.crossOrigin = 'anonymous';
+  activeAudio = audio;
+  activeProgress = progressEl;
+
+  const source = ctx.createMediaElementSource(audio);
+  const reverbChain = reverbEnabled ? await buildReverbChain(ctx) : null;
+  if (reverbChain) {
+    activeWetGain = reverbChain.wetGain;
+    source.connect(reverbChain.reverbInput);
+  }
+  source.connect(ctx.destination);
+
+  if (progressEl) {
+    progressEl.style.transition = 'none';
+    progressEl.style.height = '100%';
+  }
+
+  audio.addEventListener('loadedmetadata', () => {
+    audio.play().then(() => {
+      if (reverbChain) {
+        const now = ctx.currentTime;
+        const endAt = now + (audio.duration - audio.currentTime);
+        const { wetGain } = reverbChain;
+        wetGain.gain.setValueAtTime(0, now);
+        wetGain.gain.setValueAtTime(0, endAt - 0.15);
+        wetGain.gain.linearRampToValueAtTime(0.7, endAt);
+      }
+      if (progressEl) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            progressEl.style.transition = `height ${audio.duration}s linear`;
+            progressEl.style.height = '0%';
+          });
+        });
+      }
+    });
+  });
+
+  audio.addEventListener('ended', () => {
+    if (progressEl) {
+      progressEl.style.transition = 'none';
+      progressEl.style.height = '0%';
+    }
+    activeAudio = null;
+    activeProgress = null;
+  });
+}
+
+export async function playAudioDirect(src, reverbEnabled) {
+  await playAudioCore(src, reverbEnabled, null);
+}
+
+const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite, color = 'red', keyLabel, reverbEnabled, playCount, onPlay }, ref) {
   const progressRef = useRef(null);
 
   async function handleClick() {
     if (!soundSrc) return;
-
-    stopActiveAudio();
-
-    const ctx = getAudioContext();
-    if (ctx.state === 'suspended') ctx.resume();
-
-    const audio = new Audio(soundSrc);
-    audio.crossOrigin = 'anonymous';
-    activeAudio = audio;
-    activeProgress = progressRef.current;
-
-    const source = ctx.createMediaElementSource(audio);
-    const reverbChain = reverbEnabled ? await buildReverbChain(ctx) : null;
-    if (reverbChain) {
-      activeWetGain = reverbChain.wetGain;
-      source.connect(reverbChain.reverbInput);
-    }
-
-    source.connect(ctx.destination);
-
-    const progress = progressRef.current;
-    progress.style.transition = 'none';
-    progress.style.height = '100%';
-
-    audio.addEventListener('loadedmetadata', () => {
-      audio.play().then(() => {
-        if (reverbChain) {
-          const now = ctx.currentTime;
-          const endAt = now + (audio.duration - audio.currentTime);
-          const { wetGain } = reverbChain;
-          wetGain.gain.setValueAtTime(0, now);
-          wetGain.gain.setValueAtTime(0, endAt - 0.15);
-          wetGain.gain.linearRampToValueAtTime(0.7, endAt);
-        }
-      });
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          progress.style.transition = `height ${audio.duration}s linear`;
-          progress.style.height = '0%';
-        });
-      });
-    });
-
-    audio.addEventListener('ended', () => {
-      progress.style.transition = 'none';
-      progress.style.height = '0%';
-      activeAudio = null;
-      activeProgress = null;
-    });
+    onPlay?.(label);
+    await playAudioCore(soundSrc, reverbEnabled, progressRef.current);
   }
 
   function handleFavorite(e) {
@@ -140,6 +147,7 @@ const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, is
         {isFavorited ? '★' : '☆'}
       </span>
       <span className="sound-button-label">{label}</span>
+      {playCount > 0 && <span className={`sound-button-plays${keyLabel ? ' sound-button-plays--with-key' : ''}`}>{playCount}</span>}
       {keyLabel && <span className="sound-button-key">{keyLabel}</span>}
     </button>
   );

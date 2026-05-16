@@ -107,6 +107,43 @@ body {
   border-color: #555;
 }
 
+.broadcast-toggle {
+  background: none;
+  border: 1px solid #2e2e2e;
+  border-radius: 4px;
+  color: #444;
+  font-family: 'Geist Pixel', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition:
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.broadcast-toggle:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .broadcast-toggle:hover {
+    border-color: #444;
+    color: #666;
+  }
+
+  .broadcast-toggle.is-on:hover {
+    border-color: #888;
+    color: #ccc;
+  }
+}
+
+.broadcast-toggle.is-on {
+  color: #fff;
+  border-color: #555;
+}
+
 .reverb-toggle-status {
   display: inline-block;
   opacity: 1;
@@ -419,6 +456,21 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   text-align: left;
+}
+
+.sound-button-plays {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  font-family: 'Geist Pixel', monospace;
+  font-size: 12px;
+  color: #000;
+  opacity: 0.5;
+  line-height: 1;
+}
+
+.sound-button-plays--with-key {
+  bottom: 22px;
 }
 
 .sound-button-key {

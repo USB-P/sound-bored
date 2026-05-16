@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-react'
-import SoundButton, { stopActiveAudio, isAudioActive } from './components/SoundButton'
+import SoundButton, { stopActiveAudio, isAudioActive, playAudioDirect } from './components/SoundButton'
+import { supabase } from './supabase'
 
 const FAV_KEYS = ['1','2','3','4','5','6','7','8','9','0']
 
@@ -32,13 +33,52 @@ function App() {
   const { user } = useUser()
   const [favorites, setFavorites] = useState([])
   const [reverbEnabled, setReverbEnabled] = useState(true)
+  const [broadcastEnabled, setBroadcastEnabled] = useState(false)
+  const [playCounts, setPlayCounts] = useState({})
+
+  const channelRef = useRef(null)
+  const reverbEnabledRef = useRef(reverbEnabled)
+  useEffect(() => { reverbEnabledRef.current = reverbEnabled }, [reverbEnabled])
 
   useEffect(() => {
     if (user) {
       setFavorites(user.unsafeMetadata?.favorites ?? [])
       setReverbEnabled(user.unsafeMetadata?.reverb ?? true)
+      setBroadcastEnabled(user.unsafeMetadata?.broadcast ?? false)
     }
   }, [user?.id])
+
+  useEffect(() => {
+    supabase.from('play_counts').select('sound_label, total_plays').then(({ data }) => {
+      if (data) {
+        const counts = {}
+        data.forEach(row => { counts[row.sound_label] = row.total_plays })
+        setPlayCounts(counts)
+      }
+    })
+  }, [])
+
+  useEffect(() => {
+    if (!broadcastEnabled) {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
+      return
+    }
+
+    const channel = supabase.channel('sound-bored')
+    channel.on('broadcast', { event: 'play' }, ({ payload }) => {
+      const sound = sounds.find(s => s.label === payload.label)
+      if (sound) playAudioDirect(sound.src, reverbEnabledRef.current)
+    }).subscribe()
+
+    channelRef.current = channel
+    return () => {
+      supabase.removeChannel(channel)
+      channelRef.current = null
+    }
+  }, [broadcastEnabled])
 
   function toggleFavorite(label) {
     const next = favorites.includes(label)
@@ -48,10 +88,24 @@ function App() {
     user.update({ unsafeMetadata: { ...user.unsafeMetadata, favorites: next } })
   }
 
+  async function trackPlay(label) {
+    setPlayCounts(prev => ({ ...prev, [label]: (prev[label] ?? 0) + 1 }))
+    supabase.rpc('increment_play_count', { label })
+    if (broadcastEnabled && channelRef.current) {
+      channelRef.current.send({ type: 'broadcast', event: 'play', payload: { label } })
+    }
+  }
+
   function toggleReverb() {
     const next = !reverbEnabled
     setReverbEnabled(next)
     user.update({ unsafeMetadata: { ...user.unsafeMetadata, reverb: next } })
+  }
+
+  function toggleBroadcast() {
+    const next = !broadcastEnabled
+    setBroadcastEnabled(next)
+    user.update({ unsafeMetadata: { ...user.unsafeMetadata, broadcast: next } })
   }
 
   const favRefs = useRef([])
@@ -119,6 +173,9 @@ function App() {
             <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
               reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span>
             </button>
+            <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
+              broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span>
+            </button>
             <UserButton appearance={{
               variables: {
                 colorPrimary: '#cd401d',
@@ -153,6 +210,8 @@ function App() {
                 isFavorited
                 onToggleFavorite={toggleFavorite}
                 reverbEnabled={reverbEnabled}
+                playCount={playCounts[sound.label] ?? 0}
+                onPlay={trackPlay}
               />
             ))}
             {Array.from({ length: placeholderCount }).map((_, i) => (
@@ -173,6 +232,8 @@ function App() {
                 isFavorited={favorites.includes(sound.label)}
                 onToggleFavorite={toggleFavorite}
                 reverbEnabled={reverbEnabled}
+                playCount={playCounts[sound.label] ?? 0}
+                onPlay={trackPlay}
               />
             ))}
           </div>
