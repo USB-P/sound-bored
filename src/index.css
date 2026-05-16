@@ -19,19 +19,22 @@ body {
 #root {
   min-height: 100svh;
   display: flex;
-  align-items: flex-start;
+  align-items: stretch;
   justify-content: center;
-  padding-top: 20px;
 }
 
 .auth-wrapper {
   display: flex;
   justify-content: center;
-  padding: 10vh 1rem 1rem;
+  align-items: center;
+  flex-grow: 1;
+  padding: 1rem;
 }
 
 /* Soundboard card */
 .soundboard-card {
+  align-self: flex-start;
+  margin-top: 20px;
   background: #171717;
   border: 1px solid #262626;
   border-radius: 32px;
@@ -59,36 +62,65 @@ body {
   white-space: nowrap;
 }
 
+.favorites-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.favorites-label {
+  font-family: 'Geist Pixel', monospace;
+  font-size: 11px;
+  color: #444;
+  letter-spacing: -0.044px;
+  line-height: 1;
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 8px;
+}
+
 .sound-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   gap: 8px;
 }
 
-/* Sound button */
+/* Favourite placeholder slot */
+.sound-button-placeholder {
+  position: relative;
+  width: 100%;
+  height: 135px;
+  background: #1a1a1a;
+  border: 1px dashed #2e2e2e;
+  border-radius: 8px;
+}
+
+.sound-button-placeholder-key {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  font-family: 'Geist Pixel', monospace;
+  font-size: 12px;
+  color: #444;
+  line-height: 1;
+}
+
+/* Sound button — base */
 .sound-button {
   position: relative;
   width: 100%;
   height: 135px;
-  background-color: #cd401d;
-  background-image: none;
-  border: 1px solid #cd401d;
+  border: 1px solid transparent;
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
-  /* match hover layer structure so CSS can interpolate — not snap */
-  background-image: linear-gradient(90deg, rgba(255, 222, 172, 0) 0%, rgba(255, 222, 172, 0) 100%);
-  box-shadow:
-    inset 0px 0px 50px 20px rgba(255, 255, 255, 0.2),
-    0px 0px 215px 0px rgba(205, 64, 29, 0),
-    0px 0px 123px 0px rgba(205, 64, 29, 0),
-    0px 0px 72px 0px rgba(205, 64, 29, 0),
-    0px 0px 36px 0px rgba(255, 222, 172, 0),
-    0px 0px 10px 0px rgba(255, 222, 172, 0),
-    0px 0px 5px 0px rgba(255, 222, 172, 0);
   /* exit: slightly slower, ease fades the glow out gracefully */
   transition:
     border-color 200ms ease,
+    background-color 200ms ease,
     background-image 200ms ease,
     box-shadow 250ms ease,
     transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
@@ -103,15 +135,32 @@ body {
     /* enter: strong ease-out snaps in immediately */
     transition:
       border-color 100ms cubic-bezier(0.23, 1, 0.32, 1),
+      background-color 100ms cubic-bezier(0.23, 1, 0.32, 1),
       background-image 100ms cubic-bezier(0.23, 1, 0.32, 1),
       box-shadow 150ms cubic-bezier(0.23, 1, 0.32, 1),
       transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+}
+
+/* Red */
+.sound-button--red {
+  background-color: #cd401d;
+  border-color: #cd401d;
+  background-image: linear-gradient(90deg, rgba(255, 222, 172, 0) 0%, rgba(255, 222, 172, 0) 100%);
+  box-shadow:
+    inset 0px 0px 50px 20px rgba(255, 255, 255, 0.2),
+    0px 0px 215px 0px rgba(205, 64, 29, 0),
+    0px 0px 123px 0px rgba(205, 64, 29, 0),
+    0px 0px 72px 0px rgba(205, 64, 29, 0),
+    0px 0px 36px 0px rgba(255, 222, 172, 0),
+    0px 0px 10px 0px rgba(255, 222, 172, 0),
+    0px 0px 5px 0px rgba(255, 222, 172, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sound-button--red:hover {
     border-color: #e3855c;
-    background-image: linear-gradient(
-      90deg,
-      rgba(255, 222, 172, 0.31) 0%,
-      rgba(255, 222, 172, 0.31) 100%
-    );
+    background-image: linear-gradient(90deg, rgba(255, 222, 172, 0.31) 0%, rgba(255, 222, 172, 0.31) 100%);
     box-shadow:
       inset 0px 0px 50px 20px rgba(255, 255, 255, 0.2),
       0px 0px 215px 0px rgba(205, 64, 29, 0.5),
@@ -120,6 +169,127 @@ body {
       0px 0px 36px 0px rgba(255, 222, 172, 0.5),
       0px 0px 10px 0px rgba(255, 222, 172, 0.5),
       0px 0px 5px 0px rgba(255, 222, 172, 0.5);
+  }
+}
+
+/* Sky Blue */
+.sound-button--blue {
+  background-color: #55a0f7;
+  border-color: #55a0f7;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%);
+  box-shadow:
+    inset 0px 0px 50px 20px rgba(255, 255, 255, 0.26),
+    0px 0px 215px 0px rgba(85, 160, 247, 0),
+    0px 0px 123px 0px rgba(85, 160, 247, 0),
+    0px 0px 72px 0px rgba(85, 160, 247, 0),
+    0px 0px 36px 0px rgba(255, 255, 255, 0),
+    0px 0px 10px 0px rgba(255, 255, 255, 0),
+    0px 0px 5px 0px rgba(255, 255, 255, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sound-button--blue:hover {
+    border-color: #a0cafb;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.2) 100%);
+    box-shadow:
+      inset 0px 0px 50px 20px rgba(255, 255, 255, 0.26),
+      0px 0px 215px 0px rgba(85, 160, 247, 0.5),
+      0px 0px 123px 0px rgba(85, 160, 247, 0.5),
+      0px 0px 72px 0px rgba(85, 160, 247, 0.5),
+      0px 0px 36px 0px rgba(255, 255, 255, 0.5),
+      0px 0px 10px 0px rgba(255, 255, 255, 0.5),
+      0px 0px 5px 0px rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* White / Cream */
+.sound-button--white {
+  background-color: #f8f2e4;
+  border-color: #f8f2e4;
+  background-image: linear-gradient(90deg, rgba(248, 242, 228, 0) 0%, rgba(248, 242, 228, 0) 100%);
+  box-shadow:
+    inset 0px 0px 50px 20px rgba(198, 161, 119, 0.4),
+    0px 0px 215px 0px rgba(248, 242, 228, 0),
+    0px 0px 123px 0px rgba(248, 242, 228, 0),
+    0px 0px 72px 0px rgba(248, 242, 228, 0),
+    0px 0px 36px 0px rgba(248, 242, 228, 0),
+    0px 0px 10px 0px rgba(248, 242, 228, 0),
+    0px 0px 5px 0px rgba(248, 242, 228, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sound-button--white:hover {
+    background-color: #f8f2e4;
+    border-color: #ffffff;
+    background-image: linear-gradient(90deg, rgba(248, 242, 228, 0) 0%, rgba(248, 242, 228, 0) 100%);
+    box-shadow:
+      inset 0px 0px 50px 20px rgba(198, 161, 119, 0.4),
+      0px 0px 215px 0px rgba(248, 242, 228, 0.5),
+      0px 0px 123px 0px rgba(248, 242, 228, 0.5),
+      0px 0px 72px 0px rgba(248, 242, 228, 0.5),
+      0px 0px 36px 0px rgba(248, 242, 228, 0.5),
+      0px 0px 10px 0px rgba(248, 242, 228, 0.5),
+      0px 0px 5px 0px rgba(248, 242, 228, 0.5);
+  }
+}
+
+/* Purple */
+.sound-button--purple {
+  background-color: #a56af1;
+  border-color: #a56af1;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%);
+  box-shadow:
+    inset 0px 0px 50px 20px rgba(255, 255, 255, 0.26),
+    0px 0px 215px 0px rgba(165, 106, 241, 0),
+    0px 0px 123px 0px rgba(165, 106, 241, 0),
+    0px 0px 72px 0px rgba(165, 106, 241, 0),
+    0px 0px 36px 0px rgba(255, 255, 255, 0),
+    0px 0px 10px 0px rgba(255, 255, 255, 0),
+    0px 0px 5px 0px rgba(255, 255, 255, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sound-button--purple:hover {
+    border-color: #d5b9f8;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.4) 100%);
+    box-shadow:
+      inset 0px 0px 50px 20px rgba(255, 255, 255, 0.26),
+      0px 0px 215px 0px rgba(165, 106, 241, 0.5),
+      0px 0px 123px 0px rgba(165, 106, 241, 0.5),
+      0px 0px 72px 0px rgba(165, 106, 241, 0.5),
+      0px 0px 36px 0px rgba(255, 255, 255, 0.5),
+      0px 0px 10px 0px rgba(255, 255, 255, 0.5),
+      0px 0px 5px 0px rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* Yellow */
+.sound-button--yellow {
+  background-color: #f1df6a;
+  border-color: #f1df6a;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 100%);
+  box-shadow:
+    inset 0px 0px 50px 20px rgba(255, 255, 255, 0.26),
+    0px 0px 215px 0px rgba(241, 223, 106, 0),
+    0px 0px 123px 0px rgba(241, 223, 106, 0),
+    0px 0px 72px 0px rgba(241, 223, 106, 0),
+    0px 0px 36px 0px rgba(255, 255, 255, 0),
+    0px 0px 10px 0px rgba(255, 255, 255, 0),
+    0px 0px 5px 0px rgba(255, 255, 255, 0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sound-button--yellow:hover {
+    border-color: #f1df6a;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.1) 100%);
+    box-shadow:
+      inset 0px 0px 50px 20px rgba(255, 255, 255, 0.26),
+      0px 0px 215px 0px rgba(241, 223, 106, 0.5),
+      0px 0px 123px 0px rgba(241, 223, 106, 0.5),
+      0px 0px 72px 0px rgba(241, 223, 106, 0.5),
+      0px 0px 36px 0px rgba(255, 255, 255, 0.5),
+      0px 0px 10px 0px rgba(255, 255, 255, 0.5),
+      0px 0px 5px 0px rgba(255, 255, 255, 0.5);
   }
 }
 
@@ -183,4 +353,15 @@ body {
   letter-spacing: -0.048px;
   line-height: 1;
   white-space: nowrap;
+}
+
+.sound-button-key {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  font-family: 'Geist Pixel', monospace;
+  font-size: 12px;
+  color: #000;
+  opacity: 0.4;
+  line-height: 1;
 }
