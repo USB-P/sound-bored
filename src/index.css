@@ -384,6 +384,7 @@ body {
     padding: 16px;
     gap: 16px;
     margin-top: 12px;
+    width: calc(100vw - 16px);
   }
 
   .sound-grid,
