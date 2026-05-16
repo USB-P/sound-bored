@@ -15,7 +15,7 @@ export function stopActiveAudio() {
   }
 }
 
-function SoundButton({ label, soundSrc, index }) {
+function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite }) {
   const progressRef = useRef(null);
 
   function handleClick() {
@@ -49,12 +49,25 @@ function SoundButton({ label, soundSrc, index }) {
     });
   }
 
+  function handleFavorite(e) {
+    e.stopPropagation();
+    onToggleFavorite(label);
+  }
+
   const paddedIndex = String(index).padStart(2, '0');
 
   return (
     <button className="sound-button" onClick={handleClick}>
       <div ref={progressRef} className="sound-button-progress" />
       <span className="sound-button-index">{paddedIndex}</span>
+      <span
+        className={`sound-button-favorite${isFavorited ? ' is-favorite' : ''}`}
+        onClick={handleFavorite}
+        role="button"
+        aria-label={isFavorited ? 'Remove from favourites' : 'Add to favourites'}
+      >
+        {isFavorited ? '★' : '☆'}
+      </span>
       <span className="sound-button-label">{label}</span>
     </button>
   );

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { SignedIn, SignedOut, SignIn, UserButton } from '@clerk/clerk-react'
+import { useEffect, useState } from 'react'
+import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-react'
 import SoundButton, { stopActiveAudio } from './components/SoundButton'
 import fiftyLet from './sounds/50_let.mp3'
 import ameba from './sounds/ameba.mp3'
@@ -72,6 +72,26 @@ const sounds = [
 ]
 
 function App() {
+  const { user } = useUser()
+  const [favorites, setFavorites] = useState([])
+
+  useEffect(() => {
+    if (user) setFavorites(user.unsafeMetadata?.favorites ?? [])
+  }, [user?.id])
+
+  function toggleFavorite(label) {
+    const next = favorites.includes(label)
+      ? favorites.filter(f => f !== label)
+      : [...favorites, label]
+    setFavorites(next)
+    user.update({ unsafeMetadata: { ...user.unsafeMetadata, favorites: next } })
+  }
+
+  const sortedSounds = [
+    ...sounds.filter(s => favorites.includes(s.label)),
+    ...sounds.filter(s => !favorites.includes(s.label)),
+  ]
+
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === 'Escape') {
@@ -87,7 +107,24 @@ function App() {
     <>
       <SignedOut>
         <div className="auth-wrapper">
-          <SignIn />
+          <SignIn appearance={{
+            variables: {
+              colorPrimary: '#cd401d',
+              colorBackground: '#171717',
+              colorText: '#ffffff',
+              colorTextSecondary: '#999999',
+              colorInputBackground: '#262626',
+              colorInputText: '#ffffff',
+              colorNeutral: '#ffffff',
+              borderRadius: '8px',
+              fontFamily: "'Geist Pixel', monospace",
+            },
+            elements: {
+              card: { border: '1px solid #262626', boxShadow: 'none' },
+              formButtonPrimary: { backgroundColor: '#cd401d', '&:hover': { backgroundColor: '#e3855c' } },
+              footerActionLink: { color: '#e3855c' },
+            },
+          }} />
         </div>
       </SignedOut>
 
@@ -95,11 +132,35 @@ function App() {
         <div className="soundboard-card">
           <div className="soundboard-header">
             <span className="soundboard-title">Sound-Bored</span>
-            <UserButton />
+            <UserButton appearance={{
+              variables: {
+                colorPrimary: '#cd401d',
+                colorBackground: '#171717',
+                colorText: '#ffffff',
+                colorTextSecondary: '#999999',
+                colorInputBackground: '#262626',
+                colorInputText: '#ffffff',
+                colorNeutral: '#ffffff',
+                borderRadius: '8px',
+                fontFamily: "'Geist Pixel', monospace",
+              },
+              elements: {
+                card: { border: '1px solid #262626', boxShadow: 'none' },
+                formButtonPrimary: { backgroundColor: '#cd401d' },
+                footerActionLink: { color: '#e3855c' },
+              },
+            }} />
           </div>
           <div className="sound-grid">
-            {sounds.map((sound, i) => (
-              <SoundButton key={sound.label} index={i + 1} label={sound.label} soundSrc={sound.src} />
+            {sortedSounds.map((sound, i) => (
+              <SoundButton
+                key={sound.label}
+                index={i + 1}
+                label={sound.label}
+                soundSrc={sound.src}
+                isFavorited={favorites.includes(sound.label)}
+                onToggleFavorite={toggleFavorite}
+              />
             ))}
           </div>
         </div>
