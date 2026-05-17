@@ -4,10 +4,32 @@ let audioCtx = null;
 let activeAudio = null;
 let activeProgress = null;
 let activeWetGain = null;
+let analyserNode = null;
 
 function getAudioContext() {
   if (!audioCtx) audioCtx = new AudioContext();
   return audioCtx;
+}
+
+function getAnalyser(ctx) {
+  if (!analyserNode) {
+    analyserNode = ctx.createAnalyser();
+    analyserNode.fftSize = 256;
+    analyserNode.smoothingTimeConstant = 0.85;
+  }
+  return analyserNode;
+}
+
+export function getMeterLevel() {
+  if (!analyserNode) return 0;
+  const data = new Uint8Array(analyserNode.frequencyBinCount);
+  analyserNode.getByteTimeDomainData(data);
+  let sum = 0;
+  for (let i = 0; i < data.length; i++) {
+    const v = (data[i] - 128) / 128;
+    sum += v * v;
+  }
+  return Math.sqrt(sum / data.length);
 }
 
 let impulseBuffer = null;
@@ -71,6 +93,7 @@ async function playAudioCore(src, reverbEnabled, progressEl) {
   activeProgress = progressEl;
 
   const source = ctx.createMediaElementSource(audio);
+  source.connect(getAnalyser(ctx));
   const reverbChain = reverbEnabled ? await buildReverbChain(ctx) : null;
   if (reverbChain) {
     activeWetGain = reverbChain.wetGain;

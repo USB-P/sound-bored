@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-react'
 import SoundButton, { stopActiveAudio, isAudioActive, playAudioDirect } from './components/SoundButton'
+import DbMeter from './components/DbMeter'
 import { supabase } from './supabase'
 
 const FAV_KEYS = ['1','2','3','4','5','6','7','8','9','0']
@@ -11,6 +12,9 @@ const colorGlobs = {
   white:  import.meta.glob('./sounds/white/*.mp3',  { eager: true }),
   purple: import.meta.glob('./sounds/purple/*.mp3', { eager: true }),
   yellow: import.meta.glob('./sounds/yellow/*.mp3', { eager: true }),
+  green:  import.meta.glob('./sounds/green/*.mp3',  { eager: true }),
+  orange: import.meta.glob('./sounds/orange/*.mp3', { eager: true }),
+  pink:   import.meta.glob('./sounds/pink/*.mp3',   { eager: true }),
 }
 
 const sounds = Object.entries(colorGlobs).flatMap(([color, modules]) =>
@@ -34,9 +38,11 @@ function App() {
   const [favorites, setFavorites] = useState([])
   const [reverbEnabled, setReverbEnabled] = useState(true)
   const [broadcastEnabled, setBroadcastEnabled] = useState(false)
+  const [broadcastUsers, setBroadcastUsers] = useState([])
   const [playCounts, setPlayCounts] = useState({})
 
   const channelRef = useRef(null)
+  const leavingTimeoutsRef = useRef({})
   const reverbEnabledRef = useRef(reverbEnabled)
   useEffect(() => { reverbEnabledRef.current = reverbEnabled }, [reverbEnabled])
 
@@ -64,19 +70,51 @@ function App() {
         supabase.removeChannel(channelRef.current)
         channelRef.current = null
       }
+      setBroadcastUsers([])
       return
     }
 
     const channel = supabase.channel('sound-bored')
-    channel.on('broadcast', { event: 'play' }, ({ payload }) => {
-      const sound = sounds.find(s => s.label === payload.label)
-      if (sound) playAudioDirect(sound.src, reverbEnabledRef.current)
-    }).subscribe()
+    channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState()
+        const all = Object.values(state).flat()
+        const currentIds = new Set(all.map(u => u.userId))
+        const unique = Array.from(new Map(all.map(u => [u.userId, u])).values())
+
+        setBroadcastUsers(prev => {
+          const leaving = prev.filter(u => !u.leaving && !currentIds.has(u.userId))
+          leaving.forEach(u => {
+            if (!leavingTimeoutsRef.current[u.userId]) {
+              leavingTimeoutsRef.current[u.userId] = setTimeout(() => {
+                setBroadcastUsers(p => p.filter(x => x.userId !== u.userId))
+                delete leavingTimeoutsRef.current[u.userId]
+              }, 200)
+            }
+          })
+          return [
+            ...unique,
+            ...leaving.map(u => ({ ...u, leaving: true })),
+          ]
+        })
+      })
+      .on('broadcast', { event: 'play' }, ({ payload }) => {
+        const sound = sounds.find(s => s.label === payload.label)
+        if (sound) playAudioDirect(sound.src, reverbEnabledRef.current)
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ userId: user.id, avatarUrl: user.imageUrl })
+        }
+      })
 
     channelRef.current = channel
     return () => {
+      Object.values(leavingTimeoutsRef.current).forEach(clearTimeout)
+      leavingTimeoutsRef.current = {}
       supabase.removeChannel(channel)
       channelRef.current = null
+      setBroadcastUsers([])
     }
   }, [broadcastEnabled])
 
@@ -169,13 +207,30 @@ function App() {
       <SignedIn>
         <div className="soundboard-card">
           <div className="soundboard-header">
-            <span className="soundboard-title">sound-bored</span>
-            <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
-              reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span>
-            </button>
-            <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
-              broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span>
-            </button>
+            <div className="soundboard-title-group">
+              <span className="soundboard-title">sound-bored</span>
+              <DbMeter />
+              <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
+                reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${reverbEnabled ? ' is-on' : ''}`} />
+              </button>
+            </div>
+            <div className="broadcast-section">
+              <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
+                broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${broadcastEnabled ? ' is-on' : ''}`} />
+              </button>
+              {broadcastUsers.length > 0 && (
+                <div className="broadcast-avatars">
+                  {broadcastUsers.map(u => (
+                    <img
+                      key={u.userId}
+                      src={u.avatarUrl}
+                      className={`broadcast-avatar${u.leaving ? ' broadcast-avatar--leaving' : ''}`}
+                      alt=""
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
             <UserButton appearance={{
               variables: {
                 colorPrimary: '#cd401d',
