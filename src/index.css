@@ -232,6 +232,12 @@ body {
   transform: translateY(-50%);
   display: flex;
   align-items: center;
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+.broadcast-avatars--dim {
+  opacity: 0.5;
 }
 
 .broadcast-avatar {

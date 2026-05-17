@@ -44,7 +44,9 @@ function App() {
   const channelRef = useRef(null)
   const leavingTimeoutsRef = useRef({})
   const reverbEnabledRef = useRef(reverbEnabled)
+  const broadcastEnabledRef = useRef(broadcastEnabled)
   useEffect(() => { reverbEnabledRef.current = reverbEnabled }, [reverbEnabled])
+  useEffect(() => { broadcastEnabledRef.current = broadcastEnabled }, [broadcastEnabled])
 
   useEffect(() => {
     if (user) {
@@ -65,14 +67,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!broadcastEnabled) {
-      if (channelRef.current) {
-        supabase.removeChannel(channelRef.current)
-        channelRef.current = null
-      }
-      setBroadcastUsers([])
-      return
-    }
+    if (!user) return
 
     const channel = supabase.channel('sound-bored')
     channel
@@ -103,7 +98,7 @@ function App() {
         if (sound) playAudioDirect(sound.src, reverbEnabledRef.current)
       })
       .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
+        if (status === 'SUBSCRIBED' && broadcastEnabledRef.current) {
           await channel.track({ userId: user.id, avatarUrl: user.imageUrl })
         }
       })
@@ -115,6 +110,16 @@ function App() {
       supabase.removeChannel(channel)
       channelRef.current = null
       setBroadcastUsers([])
+    }
+  }, [user?.id])
+
+  useEffect(() => {
+    const channel = channelRef.current
+    if (!channel || !user) return
+    if (broadcastEnabled) {
+      channel.track({ userId: user.id, avatarUrl: user.imageUrl })
+    } else {
+      channel.untrack()
     }
   }, [broadcastEnabled])
 
@@ -220,7 +225,7 @@ function App() {
                   broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${broadcastEnabled ? ' is-on' : ''}`} />
                 </button>
                 {broadcastUsers.length > 0 && (
-                  <div className="broadcast-avatars">
+                  <div className={`broadcast-avatars${!broadcastEnabled ? ' broadcast-avatars--dim' : ''}`}>
                     {broadcastUsers.map(u => (
                       <img
                         key={u.userId}
