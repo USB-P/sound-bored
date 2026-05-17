@@ -60,6 +60,12 @@ body {
   gap: 24px;
 }
 
+.soundboard-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .db-meter {
   display: flex;
   align-items: center;
@@ -680,6 +686,20 @@ body {
     margin-top: 12px;
     margin-bottom: 12px;
     width: calc(100vw - 16px);
+  }
+
+  .soundboard-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .soundboard-title-group {
+    flex: 1;
+  }
+
+  .soundboard-controls {
+    order: 3;
+    flex-basis: 100%;
   }
 
   .sound-grid,

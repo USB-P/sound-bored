@@ -210,26 +210,28 @@ function App() {
             <div className="soundboard-title-group">
               <span className="soundboard-title">sound-bored</span>
               <DbMeter />
+            </div>
+            <div className="soundboard-controls">
               <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
                 reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${reverbEnabled ? ' is-on' : ''}`} />
               </button>
-            </div>
-            <div className="broadcast-section">
-              <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
-                broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${broadcastEnabled ? ' is-on' : ''}`} />
-              </button>
-              {broadcastUsers.length > 0 && (
-                <div className="broadcast-avatars">
-                  {broadcastUsers.map(u => (
-                    <img
-                      key={u.userId}
-                      src={u.avatarUrl}
-                      className={`broadcast-avatar${u.leaving ? ' broadcast-avatar--leaving' : ''}`}
-                      alt=""
-                    />
-                  ))}
-                </div>
-              )}
+              <div className="broadcast-section">
+                <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
+                  broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${broadcastEnabled ? ' is-on' : ''}`} />
+                </button>
+                {broadcastUsers.length > 0 && (
+                  <div className="broadcast-avatars">
+                    {broadcastUsers.map(u => (
+                      <img
+                        key={u.userId}
+                        src={u.avatarUrl}
+                        className={`broadcast-avatar${u.leaving ? ' broadcast-avatar--leaving' : ''}`}
+                        alt=""
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <UserButton appearance={{
               variables: {
