@@ -684,6 +684,148 @@ body {
   line-height: 1;
 }
 
+.suggest-btn {
+  background: none;
+  border: 1px solid #2e2e2e;
+  border-radius: 4px;
+  color: #444;
+  font-family: 'Geist Pixel', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition:
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.suggest-btn:active { transform: scale(0.97); }
+
+@media (hover: hover) and (pointer: fine) {
+  .suggest-btn:hover {
+    border-color: #444;
+    color: #666;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: #171717;
+  border: 1px solid #262626;
+  border-radius: 12px;
+  padding: 20px;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-family: 'Geist Pixel', monospace;
+  font-size: 14px;
+  color: #fff;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: #444;
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  font-family: 'Geist Pixel', monospace;
+  transition: color 150ms ease;
+}
+
+.modal-close:hover { color: #fff; }
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-label {
+  font-family: 'Geist Pixel', monospace;
+  font-size: 11px;
+  color: #444;
+}
+
+.modal-input {
+  background: #0f0f0f;
+  border: 1px solid #2e2e2e;
+  border-radius: 4px;
+  color: #fff;
+  font-family: 'Geist Pixel', monospace;
+  font-size: 12px;
+  padding: 8px;
+  outline: none;
+  width: 100%;
+  transition: border-color 150ms ease;
+}
+
+.modal-input::placeholder { color: #333; }
+.modal-input:focus { border-color: #555; }
+
+.modal-submit {
+  background: none;
+  border: 1px solid #2e2e2e;
+  border-radius: 4px;
+  color: #444;
+  font-family: 'Geist Pixel', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 7px 12px;
+  width: 100%;
+  transition: color 150ms ease, border-color 150ms ease, transform 120ms ease;
+}
+
+.modal-submit:not(:disabled):hover {
+  color: #fff;
+  border-color: #555;
+}
+
+.modal-submit:not(:disabled):active { transform: scale(0.97); }
+.modal-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.modal-error {
+  font-family: 'Geist Pixel', monospace;
+  font-size: 11px;
+  color: #cd401d;
+}
+
+.modal-success {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.modal-success p {
+  font-family: 'Geist Pixel', monospace;
+  font-size: 13px;
+  color: #7bf1a8;
+}
+
 @media (max-width: 600px) {
   .soundboard-card {
     border-radius: 20px;

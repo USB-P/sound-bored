@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-react'
 import SoundButton, { stopActiveAudio, isAudioActive, playAudioDirect } from './components/SoundButton'
 import DbMeter from './components/DbMeter'
+import SuggestModal from './components/SuggestModal'
 import { supabase } from './supabase'
 
 const FAV_KEYS = ['1','2','3','4','5','6','7','8','9','0']
@@ -40,6 +41,7 @@ function App() {
   const [broadcastEnabled, setBroadcastEnabled] = useState(false)
   const [broadcastUsers, setBroadcastUsers] = useState([])
   const [playCounts, setPlayCounts] = useState({})
+  const [showSuggest, setShowSuggest] = useState(false)
 
   const channelRef = useRef(null)
   const leavingTimeoutsRef = useRef({})
@@ -229,6 +231,7 @@ function App() {
               <DbMeter />
             </div>
             <div className="soundboard-controls">
+              <button className="suggest-btn" onClick={() => setShowSuggest(true)}>suggest</button>
               <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
                 reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${reverbEnabled ? ' is-on' : ''}`} />
               </button>
@@ -313,6 +316,7 @@ function App() {
           </div>
         </div>
       </SignedIn>
+      {showSuggest && user && <SuggestModal user={user} onClose={() => setShowSuggest(false)} />}
     </>
   )
 }
