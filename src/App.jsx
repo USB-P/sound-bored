@@ -64,6 +64,18 @@ function App() {
         setPlayCounts(counts)
       }
     })
+
+    const sub = supabase
+      .channel('play-counts-changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'play_counts' }, ({ new: row }) => {
+        setPlayCounts(prev => ({ ...prev, [row.sound_label]: row.total_plays }))
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'play_counts' }, ({ new: row }) => {
+        setPlayCounts(prev => ({ ...prev, [row.sound_label]: row.total_plays }))
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(sub) }
   }, [])
 
   useEffect(() => {
