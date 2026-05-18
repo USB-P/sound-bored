@@ -699,7 +699,7 @@ body {
 
 .suggest-btn {
   background: none;
-  border: 1px solid #555;
+  border: 1px solid #fff;
   border-radius: 4px;
   color: #fff;
   font-family: 'Geist Pixel', monospace;
@@ -717,7 +717,7 @@ body {
 
 @media (hover: hover) and (pointer: fine) {
   .suggest-btn:hover {
-    border-color: #888;
+    border-color: #ccc;
     color: #ccc;
   }
 }
