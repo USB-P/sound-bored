@@ -237,7 +237,7 @@ function App() {
               <button className={`reverb-toggle header-mobile-only${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
                 reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${reverbEnabled ? ' is-on' : ''}`} />
               </button>
-              <button className="suggest-btn header-mobile-only" onClick={() => setShowSuggest(true)}>suggest</button>
+              <button className="Suggest new sound-btn header-mobile-only" onClick={() => setShowSuggest(true)}>Suggest new sound</button>
               <div className="broadcast-section">
                 <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
                   broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${broadcastEnabled ? ' is-on' : ''}`} />
@@ -257,7 +257,7 @@ function App() {
               </div>
             </div>
             <div className="soundboard-right">
-              <button className="suggest-btn header-desktop-only" onClick={() => setShowSuggest(true)}>suggest</button>
+              <button className="Suggest new sound-btn header-desktop-only" onClick={() => setShowSuggest(true)}>Suggest new sound</button>
               <UserButton appearance={{
                 variables: {
                   colorPrimary: '#cd401d',

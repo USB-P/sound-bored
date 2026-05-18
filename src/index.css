@@ -699,9 +699,9 @@ body {
 
 .suggest-btn {
   background: none;
-  border: 1px solid #2e2e2e;
+  border: 1px solid #555;
   border-radius: 4px;
-  color: #444;
+  color: #fff;
   font-family: 'Geist Pixel', monospace;
   font-size: 11px;
   cursor: pointer;
@@ -717,8 +717,8 @@ body {
 
 @media (hover: hover) and (pointer: fine) {
   .suggest-btn:hover {
-    border-color: #444;
-    color: #666;
+    border-color: #888;
+    color: #ccc;
   }
 }
 
