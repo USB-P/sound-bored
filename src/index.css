@@ -219,6 +219,19 @@ body {
     0 0 1.08px #00c94f;
 }
 
+.soundboard-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-mobile-only { display: none; }
+
+@media (max-width: 600px) {
+  .header-desktop-only { display: none; }
+  .header-mobile-only { display: inline-flex; }
+}
+
 .broadcast-section {
   position: relative;
   display: flex;

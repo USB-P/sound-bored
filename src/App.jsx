@@ -229,12 +229,15 @@ function App() {
             <div className="soundboard-title-group">
               <span className="soundboard-title">sound-bored</span>
               <DbMeter />
-            </div>
-            <div className="soundboard-controls">
-              <button className="suggest-btn" onClick={() => setShowSuggest(true)}>suggest</button>
-              <button className={`reverb-toggle${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
+              <button className={`reverb-toggle header-desktop-only${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
                 reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${reverbEnabled ? ' is-on' : ''}`} />
               </button>
+            </div>
+            <div className="soundboard-controls">
+              <button className={`reverb-toggle header-mobile-only${reverbEnabled ? ' is-on' : ''}`} onClick={toggleReverb}>
+                reverb <span key={reverbEnabled ? 'on' : 'off'} className="reverb-toggle-status">{reverbEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${reverbEnabled ? ' is-on' : ''}`} />
+              </button>
+              <button className="suggest-btn header-mobile-only" onClick={() => setShowSuggest(true)}>suggest</button>
               <div className="broadcast-section">
                 <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
                   broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${broadcastEnabled ? ' is-on' : ''}`} />
@@ -253,24 +256,27 @@ function App() {
                 )}
               </div>
             </div>
-            <UserButton appearance={{
-              variables: {
-                colorPrimary: '#cd401d',
-                colorBackground: '#171717',
-                colorText: '#ffffff',
-                colorTextSecondary: '#999999',
-                colorInputBackground: '#262626',
-                colorInputText: '#ffffff',
-                colorNeutral: '#ffffff',
-                borderRadius: '8px',
-                fontFamily: "'Geist Pixel', monospace",
-              },
-              elements: {
-                card: { border: '1px solid #262626', boxShadow: 'none' },
-                formButtonPrimary: { backgroundColor: '#cd401d' },
-                footerActionLink: { color: '#e3855c' },
-              },
-            }} />
+            <div className="soundboard-right">
+              <button className="suggest-btn header-desktop-only" onClick={() => setShowSuggest(true)}>suggest</button>
+              <UserButton appearance={{
+                variables: {
+                  colorPrimary: '#cd401d',
+                  colorBackground: '#171717',
+                  colorText: '#ffffff',
+                  colorTextSecondary: '#999999',
+                  colorInputBackground: '#262626',
+                  colorInputText: '#ffffff',
+                  colorNeutral: '#ffffff',
+                  borderRadius: '8px',
+                  fontFamily: "'Geist Pixel', monospace",
+                },
+                elements: {
+                  card: { border: '1px solid #262626', boxShadow: 'none' },
+                  formButtonPrimary: { backgroundColor: '#cd401d' },
+                  footerActionLink: { color: '#e3855c' },
+                },
+              }} />
+            </div>
           </div>
           <div className="favorites-section">
           <span className="favorites-label">Favourites:</span>
