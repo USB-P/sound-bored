@@ -103,7 +103,9 @@ body {
   white-space: nowrap;
 }
 
-.reverb-toggle {
+.reverb-toggle,
+.broadcast-toggle,
+.suggest-btn {
   background: none;
   border: 1px solid #2e2e2e;
   border-radius: 4px;
@@ -119,59 +121,28 @@ body {
     transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
-.reverb-toggle:active {
+.reverb-toggle:active,
+.broadcast-toggle:active,
+.suggest-btn:active {
   transform: scale(0.97);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .reverb-toggle:hover {
+  .reverb-toggle:hover,
+  .broadcast-toggle:hover,
+  .suggest-btn:hover {
     border-color: #444;
     color: #666;
   }
 
-  .reverb-toggle.is-on:hover {
-    border-color: #888;
-    color: #ccc;
-  }
-}
-
-.reverb-toggle.is-on {
-  color: #fff;
-  border-color: #555;
-}
-
-.broadcast-toggle {
-  background: none;
-  border: 1px solid #2e2e2e;
-  border-radius: 4px;
-  color: #444;
-  font-family: 'Geist Pixel', monospace;
-  font-size: 11px;
-  cursor: pointer;
-  padding: 4px 8px;
-  line-height: 1;
-  transition:
-    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.broadcast-toggle:active {
-  transform: scale(0.97);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .broadcast-toggle:hover {
-    border-color: #444;
-    color: #666;
-  }
-
+  .reverb-toggle.is-on:hover,
   .broadcast-toggle.is-on:hover {
     border-color: #888;
     color: #ccc;
   }
 }
 
+.reverb-toggle.is-on,
 .broadcast-toggle.is-on {
   color: #fff;
   border-color: #555;
@@ -697,30 +668,6 @@ body {
   line-height: 1;
 }
 
-.suggest-btn {
-  background: none;
-  border: 1px solid #2e2e2e;
-  border-radius: 4px;
-  color: #444;
-  font-family: 'Geist Pixel', monospace;
-  font-size: 11px;
-  cursor: pointer;
-  padding: 4px 8px;
-  line-height: 1;
-  transition:
-    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.suggest-btn:active { transform: scale(0.97); }
-
-@media (hover: hover) and (pointer: fine) {
-  .suggest-btn:hover {
-    border-color: #444;
-    color: #666;
-  }
-}
 
 .modal-overlay {
   position: fixed;
