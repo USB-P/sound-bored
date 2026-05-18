@@ -129,10 +129,14 @@ body {
 
 @media (hover: hover) and (pointer: fine) {
   .reverb-toggle:hover,
-  .broadcast-toggle:hover,
-  .suggest-btn:hover {
+  .broadcast-toggle:hover {
     border-color: #444;
     color: #666;
+  }
+
+  .suggest-btn:hover {
+    border-color: #888;
+    color: #ccc;
   }
 
   .reverb-toggle.is-on:hover,
@@ -144,6 +148,11 @@ body {
 
 .reverb-toggle.is-on,
 .broadcast-toggle.is-on {
+  color: #fff;
+  border-color: #555;
+}
+
+.suggest-btn {
   color: #fff;
   border-color: #555;
 }
@@ -717,6 +726,12 @@ body {
 
 .modal-close:hover { color: #fff; }
 
+.modal form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .modal-field {
   display: flex;
   flex-direction: column;
@@ -726,7 +741,7 @@ body {
 .modal-label {
   font-family: 'Geist Pixel', monospace;
   font-size: 11px;
-  color: #444;
+  color: #fff;
 }
 
 .modal-input {
@@ -736,7 +751,7 @@ body {
   color: #fff;
   font-family: 'Geist Pixel', monospace;
   font-size: 12px;
-  padding: 8px;
+  padding: 12px;
   outline: none;
   width: 100%;
   transition: border-color 150ms ease;
@@ -747,9 +762,9 @@ body {
 
 .modal-submit {
   background: none;
-  border: 1px solid #2e2e2e;
+  border: 1px solid #555;
   border-radius: 4px;
-  color: #444;
+  color: #fff;
   font-family: 'Geist Pixel', monospace;
   font-size: 11px;
   cursor: pointer;
@@ -759,8 +774,8 @@ body {
 }
 
 .modal-submit:not(:disabled):hover {
-  color: #fff;
-  border-color: #555;
+  color: #ccc;
+  border-color: #888;
 }
 
 .modal-submit:not(:disabled):active { transform: scale(0.97); }
