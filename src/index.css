@@ -6,6 +6,14 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Geist Pixel Square';
+  src: url('../node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Square.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -210,6 +218,19 @@ body {
 @media (max-width: 600px) {
   .header-desktop-only { display: none; }
   .header-mobile-only { display: inline-flex; }
+}
+
+.beta-tag {
+  font-size: 8px;
+  font-family: 'Geist Pixel Square', monospace;
+  color: #cd401d;
+  border: 1px solid #cd401d;
+  border-radius: 3px;
+  padding: 1px 3px;
+  line-height: 1;
+  vertical-align: middle;
+  opacity: 0.8;
+  margin-left: 5px;
 }
 
 .broadcast-section {

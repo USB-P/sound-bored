@@ -243,6 +243,7 @@ function App() {
                 <button className={`broadcast-toggle${broadcastEnabled ? ' is-on' : ''}`} onClick={toggleBroadcast}>
                   broadcast <span key={broadcastEnabled ? 'on' : 'off'} className="reverb-toggle-status">{broadcastEnabled ? 'on' : 'off'}</span> <span className={`toggle-indicator${broadcastEnabled ? ' is-on' : ''}`} />
                 </button>
+                <span className="beta-tag">beta</span>
                 {broadcastUsers.length > 0 && (
                   <div className={`broadcast-avatars${!broadcastEnabled ? ' broadcast-avatars--dim' : ''}`}>
                     {broadcastUsers.map(u => (
