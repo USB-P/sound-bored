@@ -148,7 +148,10 @@ function App() {
 
   async function trackPlay(label) {
     setPlayCounts(prev => ({ ...prev, [label]: (prev[label] ?? 0) + 1 }))
-    await supabase.rpc('increment_play_count', { label })
+    await Promise.all([
+      supabase.rpc('increment_play_count', { label }),
+      supabase.from('play_events').insert({ sound_label: label }),
+    ])
     if (broadcastEnabled && channelRef.current) {
       channelRef.current.send({ type: 'broadcast', event: 'play', payload: { label } })
     }
