@@ -108,6 +108,7 @@ function App() {
         })
       })
       .on('broadcast', { event: 'play' }, ({ payload }) => {
+        if (!broadcastEnabledRef.current) return
         const sound = sounds.find(s => s.label === payload.label)
         if (sound) playAudioDirect(sound.src, reverbEnabledRef.current)
       })
