@@ -1,12 +1,13 @@
 import { useEffect } from 'react'
 
-export const CHANGELOG_VERSION = '1'
+export const CHANGELOG_VERSION = '2'
 
 export const CHANGELOG = [
   {
-    version: '1',
+    version: '2',
     title: "what's new",
     items: [
+      'All sounds are now normalised to the same volume — no more surprise blasts',
       'Added a last-played avatar indicator on each sound button — see who played what in real time',
       'Play events now track who played which sound for future leaderboard stats',
       'Added a "clear my last played indicator" button at the bottom of the page',
