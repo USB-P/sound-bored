@@ -141,7 +141,7 @@ export async function playAudioDirect(src, reverbEnabled) {
   await playAudioCore(src, reverbEnabled, null);
 }
 
-const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite, color = 'red', keyLabel, reverbEnabled, playCount, onPlay }, ref) {
+const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite, color = 'red', keyLabel, reverbEnabled, playCount, onPlay, lastPlayers = [] }, ref) {
   const progressRef = useRef(null);
 
   async function handleClick() {
@@ -169,6 +169,19 @@ const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, is
       >
         {isFavorited ? '★' : '☆'}
       </span>
+      {lastPlayers.length > 0 && (
+        <div className="sound-button-last-players">
+          {lastPlayers.map(p => (
+            <img
+              key={p.userId}
+              className="sound-button-last-avatar"
+              src={p.avatarUrl}
+              alt={p.displayName ?? ''}
+              title={p.displayName ?? ''}
+            />
+          ))}
+        </div>
+      )}
       <span className="sound-button-label">{label}</span>
       {playCount > 0 && <span className={`sound-button-plays${keyLabel ? ' sound-button-plays--with-key' : ''}`}>{playCount}</span>}
       {keyLabel && <span className="sound-button-key">{keyLabel}</span>}

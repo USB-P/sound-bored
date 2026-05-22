@@ -3,6 +3,7 @@ import { SignedIn, SignedOut, SignIn, UserButton, useUser } from '@clerk/clerk-r
 import SoundButton, { stopActiveAudio, isAudioActive, playAudioDirect } from './components/SoundButton'
 import DbMeter from './components/DbMeter'
 import SuggestModal from './components/SuggestModal'
+import ChangelogModal, { CHANGELOG_VERSION } from './components/ChangelogModal'
 import { supabase } from './supabase'
 
 const FAV_KEYS = ['1','2','3','4','5','6','7','8','9','0']
@@ -41,7 +42,9 @@ function App() {
   const [broadcastEnabled, setBroadcastEnabled] = useState(false)
   const [broadcastUsers, setBroadcastUsers] = useState([])
   const [playCounts, setPlayCounts] = useState({})
+  const [lastPlayed, setLastPlayed] = useState({})
   const [showSuggest, setShowSuggest] = useState(false)
+  const [showChangelog, setShowChangelog] = useState(false)
 
   const channelRef = useRef(null)
   const leavingTimeoutsRef = useRef({})
@@ -55,6 +58,9 @@ function App() {
       setFavorites(user.unsafeMetadata?.favorites ?? [])
       setReverbEnabled(user.unsafeMetadata?.reverb ?? true)
       setBroadcastEnabled(user.unsafeMetadata?.broadcast ?? false)
+      if (user.unsafeMetadata?.lastSeenChangelog !== CHANGELOG_VERSION) {
+        setShowChangelog(true)
+      }
     }
   }, [user?.id])
 
@@ -67,6 +73,18 @@ function App() {
       }
     })
 
+    supabase.from('last_play_events').select('sound_label, user_id, user_avatar_url, user_display_name').then(({ data }) => {
+      if (data) {
+        const lp = {}
+        data.forEach(row => {
+          if (!row.user_avatar_url) return
+          if (!lp[row.sound_label]) lp[row.sound_label] = []
+          lp[row.sound_label].push({ userId: row.user_id, avatarUrl: row.user_avatar_url, displayName: row.user_display_name })
+        })
+        setLastPlayed(lp)
+      }
+    })
+
     const sub = supabase
       .channel('play-counts-changes')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'play_counts' }, ({ new: row }) => {
@@ -74,6 +92,23 @@ function App() {
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'play_counts' }, ({ new: row }) => {
         setPlayCounts(prev => ({ ...prev, [row.sound_label]: row.total_plays }))
+      })
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'play_events' }, ({ new: row }) => {
+        if (!row.user_id) return
+        setLastPlayed(prev => {
+          const next = {}
+          for (const [label, players] of Object.entries(prev)) {
+            const filtered = players.filter(p => p.userId !== row.user_id)
+            if (filtered.length > 0) next[label] = filtered
+          }
+          if (row.user_avatar_url) {
+            next[row.sound_label] = [
+              ...(next[row.sound_label] ?? []),
+              { userId: row.user_id, avatarUrl: row.user_avatar_url, displayName: row.user_display_name },
+            ]
+          }
+          return next
+        })
       })
       .subscribe()
 
@@ -148,6 +183,20 @@ function App() {
 
   async function trackPlay(label) {
     setPlayCounts(prev => ({ ...prev, [label]: (prev[label] ?? 0) + 1 }))
+    if (user?.imageUrl) {
+      setLastPlayed(prev => {
+        const next = {}
+        for (const [l, players] of Object.entries(prev)) {
+          const filtered = players.filter(p => p.userId !== user.id)
+          if (filtered.length > 0) next[l] = filtered
+        }
+        next[label] = [
+          ...(next[label] ?? []),
+          { userId: user.id, avatarUrl: user.imageUrl, displayName: user.fullName ?? user.username ?? user.firstName ?? null },
+        ]
+        return next
+      })
+    }
     await Promise.all([
       supabase.rpc('increment_play_count', { label }),
       supabase.from('play_events').insert({
@@ -160,6 +209,23 @@ function App() {
     if (broadcastEnabled && channelRef.current) {
       channelRef.current.send({ type: 'broadcast', event: 'play', payload: { label } })
     }
+  }
+
+  async function clearLastPlayed() {
+    setLastPlayed(prev => {
+      const next = {}
+      for (const [label, players] of Object.entries(prev)) {
+        const filtered = players.filter(p => p.userId !== user.id)
+        if (filtered.length > 0) next[label] = filtered
+      }
+      return next
+    })
+    await supabase.from('play_events').insert({
+      sound_label: '__clear__',
+      user_id: user.id,
+      user_display_name: null,
+      user_avatar_url: null,
+    })
   }
 
   function toggleReverb() {
@@ -305,6 +371,7 @@ function App() {
                 reverbEnabled={reverbEnabled}
                 playCount={playCounts[sound.label] ?? 0}
                 onPlay={trackPlay}
+                lastPlayers={lastPlayed[sound.label] ?? []}
               />
             ))}
             {Array.from({ length: placeholderCount }).map((_, i) => (
@@ -327,12 +394,22 @@ function App() {
                 reverbEnabled={reverbEnabled}
                 playCount={playCounts[sound.label] ?? 0}
                 onPlay={trackPlay}
+                lastPlayers={lastPlayed[sound.label] ?? []}
               />
             ))}
+          </div>
+          <div className="soundboard-footer">
+            <button className="clear-last-played-btn" onClick={clearLastPlayed}>
+              Clear my last played indicator
+            </button>
           </div>
         </div>
       </SignedIn>
       {showSuggest && user && <SuggestModal user={user} onClose={() => setShowSuggest(false)} />}
+      {showChangelog && <ChangelogModal onClose={() => {
+        setShowChangelog(false)
+        user.update({ unsafeMetadata: { ...user.unsafeMetadata, lastSeenChangelog: CHANGELOG_VERSION } })
+      }} />}
     </>
   )
 }
