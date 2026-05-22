@@ -675,8 +675,21 @@ body {
   border-radius: 50%;
   object-fit: cover;
   opacity: 0.9;
+  transform: scale(1);
   border: 1.5px solid rgba(0, 0, 0, 0.2);
   flex-shrink: 0;
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    opacity 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+
+.sound-button-last-avatar[data-leaving='true'] {
+  transform: scale(0.6);
+  opacity: 0;
+  transition:
+    transform 120ms ease-out,
+    opacity 120ms ease-out;
 }
 
 .sound-button-label {

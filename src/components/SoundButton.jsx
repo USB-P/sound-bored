@@ -1,4 +1,4 @@
-import { useRef, forwardRef } from 'react';
+import { useRef, forwardRef, useState, useEffect, useLayoutEffect } from 'react';
 
 let audioCtx = null;
 let activeAudio = null;
@@ -143,6 +143,93 @@ export async function playAudioDirect(src, reverbEnabled) {
 
 const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, isFavorited, onToggleFavorite, color = 'red', keyLabel, reverbEnabled, playCount, onPlay, lastPlayers = [] }, ref) {
   const progressRef = useRef(null);
+  const [displayedPlayers, setDisplayedPlayers] = useState(lastPlayers);
+  const leavingTimers = useRef({});
+  const avatarRefs = useRef({});
+  const savedPositions = useRef({});
+
+  useEffect(() => {
+    setDisplayedPlayers(prev => {
+      const currentIds = new Set(lastPlayers.map(p => p.userId));
+      const prevNonLeaving = prev.filter(p => !p.leaving);
+
+      const leaving = prevNonLeaving.filter(p => !currentIds.has(p.userId));
+      leaving.forEach(p => {
+        if (!leavingTimers.current[p.userId]) {
+          leavingTimers.current[p.userId] = setTimeout(() => {
+            setDisplayedPlayers(d => d.filter(x => x.userId !== p.userId));
+            delete leavingTimers.current[p.userId];
+          }, 130);
+        }
+      });
+
+      lastPlayers.forEach(p => {
+        if (leavingTimers.current[p.userId]) {
+          clearTimeout(leavingTimers.current[p.userId]);
+          delete leavingTimers.current[p.userId];
+        }
+      });
+
+      return [
+        ...lastPlayers,
+        ...leaving.map(p => ({ ...p, leaving: true })),
+      ];
+    });
+  }, [lastPlayers]);
+
+  useEffect(() => {
+    return () => { Object.values(leavingTimers.current).forEach(clearTimeout); };
+  }, []);
+
+  useLayoutEffect(() => {
+    const entries = [];
+    const flips = [];
+
+    displayedPlayers.forEach(p => {
+      if (p.leaving) return;
+      const el = avatarRefs.current[p.userId];
+      if (!el) return;
+      const current = el.getBoundingClientRect();
+      const prev = savedPositions.current[p.userId];
+      savedPositions.current[p.userId] = current;
+      if (!prev) {
+        entries.push(el);
+        return;
+      }
+      const dx = prev.x - current.x;
+      if (Math.abs(dx) > 0.5) flips.push({ el, dx });
+    });
+
+    if (entries.length === 0 && flips.length === 0) return;
+
+    // Set all starting states with no transition
+    entries.forEach(el => {
+      el.style.transition = 'none';
+      el.style.transform = 'scale(0.6)';
+      el.style.opacity = '0';
+    });
+    flips.forEach(({ el, dx }) => {
+      el.style.transition = 'none';
+      el.style.transform = `translateX(${dx}px) scale(1)`;
+    });
+
+    // Single reflow commits all starting states
+    const anyEl = entries[0] ?? flips[0].el;
+    anyEl.getBoundingClientRect();
+
+    // Restore CSS transitions for everyone
+    entries.forEach(el => { el.style.transition = ''; });
+    flips.forEach(({ el }) => { el.style.transition = ''; });
+
+    // Animate to natural state in next frame
+    requestAnimationFrame(() => {
+      entries.forEach(el => {
+        el.style.transform = '';
+        el.style.opacity = '';
+      });
+      flips.forEach(({ el }) => { el.style.transform = ''; });
+    });
+  }, [displayedPlayers]);
 
   async function handleClick() {
     if (!soundSrc) return;
@@ -169,15 +256,17 @@ const SoundButton = forwardRef(function SoundButton({ label, soundSrc, index, is
       >
         {isFavorited ? '★' : '☆'}
       </span>
-      {lastPlayers.length > 0 && (
+      {displayedPlayers.length > 0 && (
         <div className="sound-button-last-players">
-          {lastPlayers.map(p => (
+          {displayedPlayers.map(p => (
             <img
               key={p.userId}
+              ref={el => { avatarRefs.current[p.userId] = el; }}
               className="sound-button-last-avatar"
               src={p.avatarUrl}
               alt={p.displayName ?? ''}
               title={p.displayName ?? ''}
+              data-leaving={p.leaving ? 'true' : undefined}
             />
           ))}
         </div>
